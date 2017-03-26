@@ -1,84 +1,116 @@
 var scaleStep = 0.1;
-var maxScale = 4;
+var maxScale = 10;
 var minScale = 0;
 var initScale = 0;
+var precisionStep = 0.04;
+
+PIXI.loader
+        .add("img/atmosphere.png")
+        .add("img/towers.png")
+        .add("img/top_tower.png")
+        .add("img/mid_tower.png")
+        .add("img/1px.png")
+        .add("img/bottom_tower.png")
+        .add("towers", "towers.json")
+        .load(function () {
+
+        });
+
 
 function init() {
 
-    renderer = PIXI.autoDetectRenderer(981, 724, {backgroundColor: 0x34495e});
+    renderer = PIXI.autoDetectRenderer(981, 724, {backgroundColor: 0x0044aa});
     document.body.appendChild(renderer.view);
-
     stage = new PIXI.Container();
+    texture = new PIXI.Container();
 
-    var farTexture = PIXI.Texture.fromImage("img/atmosphere.png", PIXI.SHAPES.RECT, 1);
-    far = new PIXI.Sprite(farTexture);
 
-    far.interactive = true;
-    far.buttonMode = true;
-
-    far.on("mousemove",mouseMove())
-        .on("mousedown", mouseDown())
-        .on("mouseup", mouseUp())
-        .on("pointermove",mouseMove())
-        .on("pointerdown", mouseDown())
-        .on("pointerup", mouseUp());
+    var background = new Background();
+    texture.interactive = true;
+    texture.buttonMode = true;
+    texture.on("mousemove", mouseMove)
+            .on("mousedown", mouseDown)
+            .on("mouseup", mouseUp)
+            .on("mouseupoutside", mouseUp)
+            .on("pointermove", mouseMove)
+            .on("pointerdown", mouseDown)
+            .on("pointerup", mouseUp);
 
     document.addEventListener("mousewheel", wheelDown, false);
-    stage.addChild(far);
-    // var midTexture = PIXI.Texture.fromImage("img/towers.png");
-    // mid = new  PIXI.extras.TilingSprite(
-    //     midTexture,
-    //     981,
-    //     500
-    // );
-    // mid.position.x = 0;
-    // mid.position.y = 128;
-    // mid.tilePosition.x = 0;
-    // mid.tilePosition.y = 0;
-    // stage.addChild(mid);
+    texture.addChild(background);
+
+//    for (var i = 0; i < 10; i++) {
+//        texture.addChild(new Tower(i * 500, -180));
+//    }
+    var towers = PIXI.loader.resources.towers.data.sort(function (a, b) {
+        return b.towers - a.towers;
+    });
+
+    towers.forEach(function (item, index) {
+        texture.addChild(new Tower(index * 500, 555, item));
+    });
+
+   
+
+
+    if (towers.length !== 0) {
+        stage.position.y = towers[0].towers * 78
+    }
+    var texture1px = PIXI.utils.TextureCache["img/1px.png"]
+   
+    var emptyContainer = new PIXI.Sprite(texture1px);
+    emptyContainer.position.y = -100000000000000000000000
+    console.log(emptyContainer.height)
+    texture.addChild(emptyContainer);
+
+
+    stage.addChild(texture);
+    texture.hitArea = stage.getLocalBounds();
     requestAnimationFrame(update);
-
     renderer.render(stage);
-
-    function mouseMove(){
-        console.log("misc mouse")
-    }
-    function mouseDown(event){
-        //this.data = event.data
-        this.dragging = true;
-        console.log("misc jos")
-    }
-
-    function mouseUp(){
-        //this.data = null
-        this.dragging = false
-        console.log("misc sus")
-    }
-
-
 }
 
 function update() {
-    //  far.tilePosition.x -= 0.128;
-//    mid.tilePosition.x -= 0.64;
-
     renderer.render(stage);
-
     requestAnimationFrame(update);
+}
+function mouseMove(e) {
+    if (this.dragging) {
+        var newPosition = this.data.getLocalPosition(this.parent);
+        var newX = newPosition.x - this.dragging.x;
+        var newY = newPosition.y - this.dragging.y;
+        if (texture.position.x + newX < 0) {
+            texture.x += newX;
+        } else {
+            texture.position.x = 0;
+        }
+//        if (texture.position.y + newY > 0) {
+//
+//            texture.y += newY;
+//
+//        } else {
+//            texture.position.y = 0;
+//        }
+        texture.y += newY;
+        this.dragging = newPosition;
+    }
+}
+
+function mouseUp() {
+    this.data = null;
+    this.dragging = false;
+}
+function mouseDown(event) {
+    this.data = event.data;
+    this.dragging = this.data.getLocalPosition(this.parent);
 }
 
 function wheelDown(e) {
-    var e = window.event || e
+    var e = window.event || e;
     var up = e.deltaY > 0;
-    console.log("am intrat")
-    console.log(e)
-
-    if ((up && initScale == maxScale) || (!up && initScale == minScale)){
-        return ;
-    }
-
-
-
+//    if ((up && initScale === maxScale) || (!up && initScale === minScale)) {
+//        return;
+//    }
     if (up) {
         stage.scale.x += scaleStep;
         stage.scale.y += scaleStep;
@@ -88,56 +120,4 @@ function wheelDown(e) {
         stage.scale.y -= scaleStep;
         initScale--;
     }
-
 }
-
-
-
-
-function addDragNDrop() {
-    stage.interactive = true;
-
-    var isDragging = false,
-        prevX, prevY;
-
-    stage.mousedown = function (moveData) {
-        var pos = moveData.data.global;
-        //  prevX = pos.x;
-        //   prevY = pos.y;
-        //    isDragging = true;
-    };
-
-    stage.mousemove = function (moveData) {
-        // if (!isDragging) {
-        //     return;
-        // }
-        // var pos = moveData.data.global;
-        // var dx = pos.x - prevX;
-        // var dy = pos.y - prevY;
-
-        console.log("dx=" + dx);
-        console.log("stage.position.x=" + stage.position.x);
-        console.log("far.position.x=" + far.position.x);
-        console.log("pos.x=" + pos.x);
-        console.log("prevX=" + prevX);
-        console.log("dy=" + dy);
-        // if (far.position.x != 0) {
-        //     far.position.x += dx;
-        // }
-        //
-        // if (far.position.y != 0) {
-        //     far.position.y += dy;
-        // }
-
-        //  stage.position.x += dx;
-        // stage.position.y += dy;
-        //     prevX = pos.x;
-        //    prevY = pos.y;
-    };
-
-    stage.mouseup = function (moveDate) {
-        isDragging = false;
-    };
-}
-
- 
