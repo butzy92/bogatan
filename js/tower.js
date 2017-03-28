@@ -1,13 +1,13 @@
 /* global PIXI */
-var START_X = 300;
-function Tower(x, y, user, maxTowers) {
+var MARGIN_X = 500;
+function Tower(x, user, maxTowers) {
     PIXI.Container.call(this);
 
-    this.position.x = START_X + x;
+    this.position.x = x * MARGIN_X;
     var mid = new PIXI.Sprite(PIXI.utils.TextureCache["img/mid_tower.png"]);
     var bottom = new PIXI.Sprite(PIXI.utils.TextureCache["img/bottom_tower.png"]);
     var top = new PIXI.Sprite(PIXI.utils.TextureCache["img/top_tower.png"]);
-    this.position.y = (maxTowers - user.towers) * mid.height;/*space for the little buildings*/
+    this.position.y = (maxTowers - user.towers) * mid.height;/*space for next little buildings*/
     this.addChild(top);
     var tempHeight = top.height;
     for (i = 0; i < user.towers; i++) {
@@ -18,6 +18,7 @@ function Tower(x, y, user, maxTowers) {
     }
     bottom.position.y = tempHeight;
     this.addChild(bottom);
+    //this.position.x+= bottom.width + MARGIN_X;
     //
     //
     // this.addChild(bottom);

@@ -1,11 +1,10 @@
 var scaleStep = 0.01;
-var maxScale = 10;
-var minScale = 0;
+//var maxScale = 10;
+//var minScale = 0;
 var initScale = 0;
-var precisionStep = 0.04;
-var HEIGHT_OF_TOWER = 78;
 var CANVAS_HEIGHT = 724;
 var CANVAS_WIDTH = 981;
+var INITIAL_SPACE = 300;
 PIXI.loader
     .add("img/atmosphere.png")
     .add("img/towers.png")
@@ -45,78 +44,63 @@ function init() {
         .on("pointerup", mouseUp);
 
     towers.forEach(function (item, index) {
-        texture.addChild(new Tower(index * 500, 555, item, towers[0].towers));
+        texture.addChild(new Tower(index, item, towers[0].towers))
     });
-
-    // if (towers.length !== 0) {
-    //     stage.position.y = towers[0].towers * HEIGHT_OF_TOWER
-    // }
-    // var emptyContainer = new PIXI.Sprite();
-    // emptyContainer.position.y = -100000000000000000000000
-    // texture.addChild(emptyContainer);
-
 
     stage.addChild(texture);
     texture.hitArea = stage.getLocalBounds();
     requestAnimationFrame(update);
     renderer.render(stage);
+    texture.position.x = INITIAL_SPACE;
 }
 
 function update() {
     renderer.render(stage);
     requestAnimationFrame(update);
 }
+function moveTexture(newMove, texture, horizontal) {
+    var CANVAS_SIZE = horizontal ? CANVAS_WIDTH : CANVAS_HEIGHT;
+    var TEXTURE_SIZE = horizontal ? texture.width : texture.height;
+    var TEXTURE_COORDINATE = horizontal ? texture.position.x : texture.position.y;
+    var TEXTURE_MOVED =  (horizontal ? texture.position.x : texture.position.y) + newMove;
+
+    if (CANVAS_SIZE > TEXTURE_SIZE) {
+        if (TEXTURE_MOVED < 0) {
+            TEXTURE_COORDINATE = 0
+        } else {
+            if (TEXTURE_MOVED > (CANVAS_SIZE - TEXTURE_SIZE)) {
+                TEXTURE_COORDINATE = (CANVAS_SIZE - TEXTURE_SIZE);
+            } else {
+                TEXTURE_COORDINATE += newMove;
+            }
+        }
+    } else {
+        if (TEXTURE_MOVED < 0) {
+            if (TEXTURE_MOVED > (CANVAS_SIZE - TEXTURE_SIZE)) {
+                TEXTURE_COORDINATE += newMove;
+            } else {
+                TEXTURE_COORDINATE = (CANVAS_SIZE - TEXTURE_SIZE);
+            }
+
+        } else {
+            TEXTURE_COORDINATE = 0
+        }
+    }
+
+    if(horizontal){
+        texture.position.x = TEXTURE_COORDINATE
+    }else{
+        texture.position.y = TEXTURE_COORDINATE
+    }
+}
 function mouseMove() {
     if (this.dragging) {
         var newPosition = this.data.getLocalPosition(this.parent);
         var newX = newPosition.x - this.dragging.x;
         var newY = newPosition.y - this.dragging.y;
-        if (texture.position.x + newX < 0) {
-            texture.x += newX;
-        } else {
-            texture.position.x = 0;
-        }
 
-        console.log("newY" + newY);
-        console.log("texture.position.y + newY= " + (texture.position.y + newY));
-        console.log("biggestTower.height - CANVAS_HEIGHT" + (CANVAS_HEIGHT - texture.height));
-        console.log("texture.height " + texture.height);
-        console.log("Math.min((CANVAS_HEIGHT - texture.height), (CANVAS_HEIGHT * -1) " + Math.min((CANVAS_HEIGHT - texture.height), (CANVAS_HEIGHT * -1)));
-        console.log("Math.min((CANVAS_HEIGHT - texture.height), (CANVAS_HEIGHT * -1) " + Math.min((CANVAS_HEIGHT - texture.height), (CANVAS_HEIGHT * -1)));
-
-        texture.position.y += newY;
-
-        // if (CANVAS_HEIGHT < texture.height) {
-            if (texture.position.y + newY < 0) {
-                if (texture.position.y + newY > (CANVAS_HEIGHT - texture.height)) {
-                    texture.position.y += newY;
-                } else {
-                    texture.position.y = (CANVAS_HEIGHT - texture.height);
-                }
-
-            } else {
-                if (CANVAS_HEIGHT > texture.height) {
-                   if(texture.position.y + newY < (CANVAS_HEIGHT - texture.height)){
-                       texture.position.y = CANVAS_HEIGHT - texture.height;
-                   }else{
-                       texture.position.y += newY;
-                   }
-
-                }else{
-                    texture.position.y = 0;
-                }
-
-            }
-        // }else{
-        //
-        // }
-
-        //texture.y += newY;
-
-        // else {
-        //     texture.position.y = HEIGHT_OF_TOWER * -1;
-        // }
-        console.log(texture.position.y)
+        moveTexture(newY, texture, false);
+        moveTexture(newX, texture, true);
         this.dragging = newPosition;
     }
 }
@@ -128,10 +112,10 @@ function mouseUp() {
 function mouseDown(event) {
     this.data = event.data;
     this.dragging = this.data.getLocalPosition(this.parent);
-    console.log(this.dragging)
 }
 
 function wheelDown(e) {
+    //noinspection JSDuplicatedDeclaration
     var e = window.event || e;
     var up = e.deltaY > 0;
 //    if ((up && initScale === maxScale) || (!up && initScale === minScale)) {
