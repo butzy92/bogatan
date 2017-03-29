@@ -47,6 +47,19 @@ function init() {
         texture.addChild(new Tower(index, item, towers[0].towers))
     });
 
+    var left = keyboard(37),
+        up = keyboard(38),
+        right = keyboard(39),
+        down = keyboard(40);
+
+    left.press = function(){
+        moveTexture(-1, texture, true);
+    };
+
+    right.press = function(){
+        moveTexture(1, texture, true);
+    };
+
     stage.addChild(texture);
     texture.hitArea = stage.getLocalBounds();
     requestAnimationFrame(update);
@@ -61,8 +74,9 @@ function update() {
 function moveTexture(newMove, texture, horizontal) {
     var CANVAS_SIZE = horizontal ? CANVAS_WIDTH : CANVAS_HEIGHT;
     var TEXTURE_SIZE = horizontal ? texture.width : texture.height;
+    //var TEXTURE_COORDINATE = horizontal ? texture.position.x : texture.position.y;
     var TEXTURE_COORDINATE = horizontal ? texture.position.x : texture.position.y;
-    var TEXTURE_MOVED =  (horizontal ? texture.position.x : texture.position.y) + newMove;
+    var TEXTURE_MOVED =  TEXTURE_COORDINATE + newMove;
 
     if (CANVAS_SIZE > TEXTURE_SIZE) {
         if (TEXTURE_MOVED < 0) {
