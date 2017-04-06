@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <repositories>
+        <repository>
+            <id>alfresco-public</id>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+        </repository>
+		<repository>
+            <id>sonar</id>
+            <url>https://oss.sonatype.org/content/groups/public</url>
+        </repository>
+    </repositories>
+
+
+    <modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.bogatan</groupId>
 	<artifactId>bogatan</artifactId>
@@ -19,6 +31,13 @@
 	</parent>
 
 	<properties>
+		<social.facebook.version>3.0.0.M1</social.facebook.version>
+		<social.core.version>2.0.0.M2</social.core.version>
+		<pixi.js.version>4.3.0</pixi.js.version>
+		<webjars-locator.version>0.32-1</webjars-locator.version>
+
+
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
@@ -33,17 +52,64 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.session</groupId>-->
+			<!--<artifactId>spring-session</artifactId>-->
+		<!--</dependency>-->
+        <dependency>
+            <groupId>org.springframework.social</groupId>
+            <artifactId>spring-social-facebook</artifactId>
+            <version>${social.facebook.version}</version>
+        </dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.social/spring-social-core -->
 		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
+			<groupId>org.springframework.social</groupId>
+			<artifactId>spring-social-core</artifactId>
+			<version>${social.core.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-social-facebook</artifactId>
-		</dependency>
+
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.boot</groupId>-->
+			<!--<artifactId>spring-boot-starter-social-facebook</artifactId>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!--Webjars-->
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>pixi.js</artifactId>
+			<version>${pixi.js.version}</version>
+			<exclusions>
+				<exclusion>  <!-- declare the exclusion here -->
+					<groupId>org.webjars.npm</groupId>
+					<artifactId>pixi-gl-core</artifactId>
+				</exclusion>
+				<exclusion>  <!-- declare the exclusion here -->
+					<groupId>org.webjars.npm</groupId>
+					<artifactId>eventemitter3</artifactId>
+				</exclusion>
+				<exclusion>  <!-- declare the exclusion here -->
+					<groupId>org.webjars.npm</groupId>
+					<artifactId>resource-loader</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.webjars.npm</groupId>
+					<artifactId>bit-twiddle</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.webjars.npm</groupId>
+					<artifactId>ismobilejs</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.webjars/webjars-locator -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>webjars-locator</artifactId>
+			<version>${webjars-locator.version}</version>
 		</dependency>
 
 		<dependency>
@@ -61,6 +127,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf -->
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.boot</groupId>-->
+			<!--<artifactId>spring-boot-starter-thymeleaf</artifactId>-->
+		<!--</dependency>-->
+
 	</dependencies>
 
 	<build>

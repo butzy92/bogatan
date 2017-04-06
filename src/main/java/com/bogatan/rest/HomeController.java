@@ -1,11 +1,13 @@
 package com.bogatan.rest;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * Created by mbutan on 3/29/2017.
- */
+import java.net.URI;
+import java.net.URISyntaxException;
+
 @Controller
 public class HomeController {
     @RequestMapping("/")
@@ -17,5 +19,11 @@ public class HomeController {
     @RequestMapping("/home")
     public String getHomeS(){
         return "index.html";
+    }
+
+
+    @RequestMapping("/login")
+    public ResponseEntity login() throws URISyntaxException{
+        return ResponseEntity.status(HttpStatus.FOUND).location(new URI("/connect/facebook")).build();
     }
 }
