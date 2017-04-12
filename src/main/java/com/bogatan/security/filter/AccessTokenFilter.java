@@ -4,14 +4,13 @@ import com.bogatan.BogatanConstants;
 import com.bogatan.exception.BogatanException;
 import com.bogatan.exception.InvalidAccessTokenException;
 import com.bogatan.exception.AccessTokenNotFoundException;
+import com.bogatan.model.UserContext;
+import com.bogatan.service.UsersService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.facebook.api.Facebook;
@@ -26,20 +25,24 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class AccessTokenFilter extends GenericFilterBean {
     private final Logger log = LoggerFactory.getLogger(AccessTokenFilter.class);
 
     private BogatanConstants bogatanConstants;
     private FacebookConnectionFactory connectionFactory;
+    private UsersService usersService;
 
     public AccessTokenFilter(BogatanConstants bogatanConstants, FacebookConnectionFactory connectionFactory) {
         this.bogatanConstants = bogatanConstants;
         this.connectionFactory = connectionFactory;
+    }
+
+    public AccessTokenFilter(BogatanConstants bogatanConstants, FacebookConnectionFactory connectionFactory, UsersService usersService) {
+        this.bogatanConstants = bogatanConstants;
+        this.connectionFactory = connectionFactory;
+        this.usersService = usersService;
     }
 
     @Override
@@ -66,13 +69,11 @@ public class AccessTokenFilter extends GenericFilterBean {
         try {
             AccessGrant accessGrant = new AccessGrant(jwt);
             Connection<Facebook> connection = connectionFactory.createConnection(accessGrant);
-            Collection<? extends GrantedAuthority> authorities =
-                    Arrays.stream(new String[]{"ROLES_USER"})
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList());
-
-            User principal = new User(connection.getDisplayName(), "", authorities);
-            UsernamePasswordAuthenticationToken us = new UsernamePasswordAuthenticationToken(principal, "", authorities);
+            if(!connection.test()){
+                throw new InvalidAccessTokenException();
+            }
+            UserContext userContext = usersService.getUserContextFromConnection(connection);
+            UsernamePasswordAuthenticationToken us = new UsernamePasswordAuthenticationToken(userContext, "", userContext.getAuthorities());
         /*http://stackoverflow.com/questions/4664893/how-to-manually-set-an-authenticated-user-in-spring-security-springmvc*/
             us.setDetails(new WebAuthenticationDetails((HttpServletRequest) request));
 

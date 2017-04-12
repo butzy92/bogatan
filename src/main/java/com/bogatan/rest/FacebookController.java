@@ -12,10 +12,7 @@ import org.springframework.social.oauth2.GrantType;
 import org.springframework.social.oauth2.OAuth2Operations;
 import org.springframework.social.oauth2.OAuth2Parameters;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
@@ -37,6 +34,7 @@ public class FacebookController {
 
     @GetMapping("/login")
     @ResponseBody
+    @CrossOrigin("*")
     public ResponseEntity helloFacebook(HttpServletRequest request) throws URISyntaxException {
         OAuth2Operations oauthOperations = facebookConnectionFactory.getOAuthOperations();
         OAuth2Parameters params = new OAuth2Parameters();
@@ -47,10 +45,12 @@ public class FacebookController {
 
     @GetMapping("/callback")
     @ResponseBody
+    @CrossOrigin("*")
     public String helloFacebook(@RequestParam("code") String code, HttpServletRequest request) {
         AccessGrant accessGrant = facebookConnectionFactory.getOAuthOperations().exchangeForAccess(code, getRedirectUri(request), null);
         /*just for the moment*/
-        return accessGrant.getAccessToken();
+
+        return "{\"token\": \""+accessGrant.getAccessToken()+"\"}";
     }
 
 
