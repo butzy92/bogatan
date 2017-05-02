@@ -13,7 +13,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.ConnectionData;
 import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.facebook.api.Permission;
 import org.springframework.social.facebook.connect.FacebookConnectionFactory;
 import org.springframework.social.oauth2.AccessGrant;
 import org.springframework.web.filter.GenericFilterBean;
@@ -25,6 +27,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class AccessTokenFilter extends GenericFilterBean {
@@ -51,9 +55,9 @@ public class AccessTokenFilter extends GenericFilterBean {
         log.info("doFilter for AccessTokenFilter");
         try {
             Optional<String> optionalJwt = getJWTValue(servletRequest);
-            if(optionalJwt.isPresent()){
-                verifyFacebookApi(optionalJwt.get(),servletRequest);
-            }else{
+            if (optionalJwt.isPresent()) {
+                verifyFacebookApi(optionalJwt.get(), servletRequest);
+            } else {
                 throw new AccessTokenNotFoundException();
             }
             filterChain.doFilter(servletRequest, servletResponse);
@@ -69,8 +73,17 @@ public class AccessTokenFilter extends GenericFilterBean {
         try {
             AccessGrant accessGrant = new AccessGrant(jwt);
             Connection<Facebook> connection = connectionFactory.createConnection(accessGrant);
-            if(!connection.test()){
+
+            if (!connection.test()) {
                 throw new InvalidAccessTokenException();
+            } else {
+                /*to be sure that we are in the same application
+                * it will stay like this until we will integrate another social client
+                * TO BE CACHED IN THE FUTURE THE ACCESS_TOKEN*/
+                Map<String, String> appInfo = connection.getApi().restOperations().getForObject(connection.getApi().getBaseGraphApiUrl() + "/app?fields=id", Map.class);
+                if(!bogatanConstants.getFacebookClientId().equals(appInfo.get("id"))){
+                    throw new InvalidAccessTokenException();
+                }
             }
             UserContext userContext = usersService.getUserContextFromConnection(connection);
             UsernamePasswordAuthenticationToken us = new UsernamePasswordAuthenticationToken(userContext, "", userContext.getAuthorities());

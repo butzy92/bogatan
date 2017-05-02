@@ -11,3 +11,15 @@ databaseChangeLog:
           relativeToChangelogFile: true
           splitStatements: true
           stripComments: true
+  - changeSet:
+      id: 2
+      author: bogatan
+      changes:
+      - sqlFile:
+          dbms: h2, oracle
+          encoding: utf8
+          endDelimiter: \nGO
+          path: create_tower.sql
+          relativeToChangelogFile: true
+          splitStatements: true
+          stripComments: true

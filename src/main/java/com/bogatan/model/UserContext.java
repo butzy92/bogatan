@@ -101,17 +101,27 @@ public class UserContext implements UserDetails {
     }
 
     @JsonIgnore
-    public boolean isTheSameUser(Users user){
-        if(!user.getEmail().equals(this.email)){
+    public boolean isTheSameUser(Users user) {
+        if (!user.getEmail().equals(this.email)) {
             return false;
         }
-        if(!user.getName().equals(this.name)){
+        if (!user.getName().equals(this.name)) {
             return false;
         }
-        if(!user.getProfilePicture().equals(this.profilePicture)){
+        if (!user.getProfilePicture().equals(this.profilePicture)) {
             return false;
         }
         return true;
+    }
+
+
+    @JsonIgnore
+    public Users getUser() {
+        return new Users()
+                .setId(this.getId())
+                .setEmail(this.getEmail())
+                .setName(this.getName())
+                .setProfilePicture(this.getProfilePicture());
     }
 
     @Override

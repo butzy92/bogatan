@@ -33,7 +33,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().anyRequest().authenticated()
                 .and().addFilterBefore(this.corsFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new AccessTokenFilter(bogatanConstants, facebookConnectionFactory, usersService),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .csrf().disable();
     }
 
     @Bean
@@ -52,6 +53,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
-                .antMatchers("/h2-console/**");
+                .antMatchers("/h2-console/**")
+                .antMatchers("/api/public/**");
     }
 }
